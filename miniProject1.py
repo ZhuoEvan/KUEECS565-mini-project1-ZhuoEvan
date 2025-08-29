@@ -84,7 +84,11 @@ def messageBreak(message, keyLength, firstWordLength, firstWordLengthList):
     firstWords = limitList(firstWordLengthList, firstWordLength)
     splitmsg = splitMessage(message, keyLength)
 
-    
+
+
+#
+def s():
+    pass
 
 #File Opener Function
 def fileOpener(file):
