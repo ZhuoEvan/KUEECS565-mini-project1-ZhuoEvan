@@ -15,7 +15,7 @@ alphabetDict = {
 def encryption(m, K):
     m = letterToNum(m)
     K = letterToNum(K)
-    result = m + K % 26
+    result = (m + K) % 26
     result = numToLetter(result)
     return result
 
@@ -23,7 +23,7 @@ def encryption(m, K):
 def decryption(m, K):
     m = letterToNum(m)
     K = letterToNum(K)
-    result = m - K % 26
+    result = (m - K) % 26
     result = numToLetter(result)
     return result
 
@@ -82,17 +82,46 @@ def messageBreak(message, keyLength, firstWordLength, firstWordLengthList):
     #Local Variables
     decipherMessages = []
     firstWords = limitList(firstWordLengthList, firstWordLength)
-    splitmsg = splitMessage(message, keyLength)
+    splitMsg = splitMessage(message, keyLength)
+
+    shiftCipher(splitMsg)
 
 
 
-#
-def s():
+#Shift Cipher Function
+def shiftCipher(splitMsg):
+    #Local Variables
+    decryptWords = []
+    
+
+
+"""
+    for num in range(0, 26):
+        decryptWord = []
+        letter = numToLetter(num)
+        for section in splitMsg:
+            for char in section:
+                decryptWord.append(decryption(char, letter))
+                combinedWord = ''.join(decryptWord)
+        decryptWords.append(combinedWord)
+    print(decryptWords)
+    print(len(decryptWords))
+"""
+
+#Key Generator Function
+def generateKey(keySize):
+    #Local Variables
+    keyList = []
+
+    for _ in range(0, keySize):
+        pass
     pass
 
 #File Opener Function
 def fileOpener(file):
+    #Local Variables
     fileContent = []
+
     with open(file) as accessFile:
         for line in accessFile:
             fileContent.append(line.strip())
