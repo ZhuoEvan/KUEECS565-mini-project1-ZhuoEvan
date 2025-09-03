@@ -84,38 +84,78 @@ def messageBreak(message, keyLength, firstWordLength, firstWordLengthList):
     firstWords = limitList(firstWordLengthList, firstWordLength)
     splitMsg = splitMessage(message, keyLength)
 
-    shiftCipher(splitMsg)
+    findKey(splitMsg, keyLength, firstWords)
 
 
-
-#Shift Cipher Function
-def shiftCipher(splitMsg):
+#Apply Key Function
+def applyKey(message, key):
     #Local Variables
-    decryptWords = []
-    
+    keyLength = len(key)
+    encryptChar = []
 
+    stringList = splitMessage(message, keyLength)
+    for string in stringList:
+        keyIndex = 0
+        for char in string:
+            encryptChar.append(encryption(char, key[keyIndex]))
+            keyIndex += 1
 
-"""
-    for num in range(0, 26):
-        decryptWord = []
-        letter = numToLetter(num)
-        for section in splitMsg:
-            for char in section:
-                decryptWord.append(decryption(char, letter))
-                combinedWord = ''.join(decryptWord)
-        decryptWords.append(combinedWord)
-    print(decryptWords)
-    print(len(decryptWords))
-"""
+    encryptedMessage = ''.join(encryptChar)
+    return encryptedMessage
 
-#Key Generator Function
-def generateKey(keySize):
+#Find Key Function
+def findKey(message, keyLength, firstWords):
     #Local Variables
+    decipherList = []
     keyList = []
+    nextKey = 0
 
-    for _ in range(0, keySize):
-        pass
-    pass
+    #Generate Key Function
+    for _ in range(0, keyLength):
+        keyList.append(0)
+
+    #Generate Next Key Function
+    while keyList[keyLength - 1] != 25:
+        for num in range(0, keyLength):
+            keyList[num] = nextKey
+            holdKeySegments = []
+
+            #Convert Key Number To Key Letter
+            for keySegment in keyList:
+                holdKeySegments.append(numToLetter(keySegment))
+            r = holdKeySegments[::-1]
+            
+            decipher = removeKey(message, ''.join(holdKeySegments))
+            decipherR = removeKey(message, ''.join(r))
+            print(decipher, decipherR)
+
+            for word in firstWords:
+                if word in decipher:
+                    decipherList.append(decipher)
+                elif word in decipherR:
+                    decipherList.append(decipherR)
+
+        nextKey += 1
+    
+    print(decipherList)
+    return decipherList
+
+
+
+#Remove Key Function
+def removeKey(message, key):
+    #Local Variables
+    decryptChar = []
+    
+    for string in message:
+        keyIndex = 0
+        for char in string:
+            decryptChar.append(decryption(char, key[keyIndex]))
+            keyIndex += 1
+    
+    decryptedMessage = ''.join(decryptChar)
+    return decryptedMessage
+
 
 #File Opener Function
 def fileOpener(file):
@@ -129,7 +169,13 @@ def fileOpener(file):
 
 #Main Function
 def main():
+    print(applyKey('JAYHAWK', 'EECS'))
     firstWordLengthList = fileOpener("MP1_dict.txt")
     messageBreak("MSOKKJCOSXOEEKDTOSLGFWCMCHSUSGX", 2, 6, firstWordLengthList)
+    messageBreak("PSPDYLOAFSGFREQKKPOERNIYVSDZSUOVGXSRRIPWERDIPCFSDIQZIASEJVCGXAYBGYXFPSREKFMEXEBIYDGFKREOWGXEQSXSKXGYRRRVMEKFFIPIWJSKFDJMBGCC", 3, 7, firstWordLengthList)
+    messageBreak("MTZHZEOQKASVBDOWMWMKMNYIIHVWPEXJA", 4, 10, firstWordLengthList)
+    messageBreak("SQLIMXEEKSXMDOSBITOTYVECRDXSCRURZYPOHRG", 5, 11, firstWordLengthList)
+    messageBreak("LDWMEKPOPSWNOAVBIDHIPCEWAETYRVOAUPSINOVDIEDHCDSELHCCPVHRPOHZUSERSFS", 6, 9, firstWordLengthList)
+    messageBreak("VVVLZWWPBWHZDKBTXLDCGOTGTGRWAQWZSDHEMXLBELUMO", 7, 13, firstWordLengthList)
 
 main()
