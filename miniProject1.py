@@ -1,5 +1,11 @@
 #miniProject1
 
+#Python Libraries
+import itertools
+import string
+import time
+import datetime
+
 #Global Variables
 alphabetDict = {
     'A': 0, 'B': 1, 'C': 2, 'D': 3,
@@ -10,6 +16,8 @@ alphabetDict = {
     'U': 20, 'V': 21, 'W': 22, 'X': 23,
     'Y': 24, 'Z': 25
 }
+
+bar = '=============================='
 
 #Encryption Function
 def encryption(m, K):
@@ -80,12 +88,29 @@ def limitList(firstWordLengthList, firstWordLength):
 #Password Crack Function
 def messageBreak(message, keyLength, firstWordLength, firstWordLengthList):
     #Local Variables
+    decipherKeys = []
     decipherMessages = []
     firstWords = limitList(firstWordLengthList, firstWordLength)
     splitMsg = splitMessage(message, keyLength)
 
-    findKey(splitMsg, keyLength, firstWords)
+    #Start Timer
+    tm = startTimer(message, keyLength, firstWordLength)
 
+    #Generate Key Function
+    allKeys = generateKeys(keyLength)
+
+    #Use all keys on the message
+    for key in allKeys:
+        decryptedMessage = removeKey(splitMsg, key)
+
+        for word in firstWords:
+            if word in decryptedMessage and decryptedMessage not in decipherMessages:
+                decipherKeys.append(key)
+                decipherMessages.append(decryptedMessage)
+
+    elapsed_time = endTimer(tm)
+    fileWrite(message, decipherMessages, decipherKeys, elapsed_time)
+    return
 
 #Apply Key Function
 def applyKey(message, key):
@@ -103,44 +128,10 @@ def applyKey(message, key):
     encryptedMessage = ''.join(encryptChar)
     return encryptedMessage
 
-#Find Key Function
-def findKey(message, keyLength, firstWords):
-    #Local Variables
-    decipherList = []
-    keyList = []
-    nextKey = 0
-
-    #Generate Key Function
-    for _ in range(0, keyLength):
-        keyList.append(0)
-
-    #Generate Next Key Function
-    while keyList[keyLength - 1] != 25:
-        for num in range(0, keyLength):
-            keyList[num] = nextKey
-            holdKeySegments = []
-
-            #Convert Key Number To Key Letter
-            for keySegment in keyList:
-                holdKeySegments.append(numToLetter(keySegment))
-            r = holdKeySegments[::-1]
-            
-            decipher = removeKey(message, ''.join(holdKeySegments))
-            decipherR = removeKey(message, ''.join(r))
-            print(decipher, decipherR)
-
-            for word in firstWords:
-                if word in decipher:
-                    decipherList.append(decipher)
-                elif word in decipherR:
-                    decipherList.append(decipherR)
-
-        nextKey += 1
-    
-    print(decipherList)
-    return decipherList
-
-
+#Generate Keys Function (Used stackOverflow)
+def generateKeys(length):
+    letters = string.ascii_uppercase
+    return [''.join(key) for key in itertools.product(letters, repeat=length)]
 
 #Remove Key Function
 def removeKey(message, key):
@@ -156,21 +147,52 @@ def removeKey(message, key):
     decryptedMessage = ''.join(decryptChar)
     return decryptedMessage
 
+#File Writer Function
+def fileWrite(msg, dMsg, dKeys, elapsed_time):
+    with open('output.txt', 'a') as outputFile:
+        outputFile.write(f'{bar}{bar}{bar}\nEncrypted Message: {msg}\n\n')
+
+        for index in range(0, len(dMsg)):
+            outputFile.write(f'{dMsg[index]} | {dKeys[index]}\n')
+
+        outputFile.write(f'\nElapsed Time: {elapsed_time:.3f} seconds\n{bar}{bar}{bar}\n\n')
+        outputFile.close()
+    return
 
 #File Opener Function
 def fileOpener(file):
     #Local Variables
     fileContent = []
 
+    #Generate Output File
+    with open('output.txt', 'w') as outputFile:
+        td = datetime.datetime.now()
+        outputFile.write(f'Output File | Started on {td.strftime('%c')}\n')
+        outputFile.close()
+
+    #Open File Function
     with open(file) as accessFile:
         for line in accessFile:
             fileContent.append(line.strip())
     return fileContent
 
+#Start Timer Function
+def startTimer(message, keyLength, firstWordLength):
+    print(f'{bar}\nStarting Timer...')
+    print(f'Decrypting Message: {message}\nKey Length: {keyLength}\nFirst Word Length: {firstWordLength}')
+    return time.time()
+
+#End Timer Function
+def endTimer(startTime):
+    elapsed_time = time.time() - startTime
+    print(f'Stopping Timer...\nElapsed Time: {elapsed_time:.3f} seconds\n{bar}\n')
+    return elapsed_time
+
 #Main Function
 def main():
-    print(applyKey('JAYHAWK', 'EECS'))
+    #Local Variables
     firstWordLengthList = fileOpener("MP1_dict.txt")
+
     messageBreak("MSOKKJCOSXOEEKDTOSLGFWCMCHSUSGX", 2, 6, firstWordLengthList)
     messageBreak("PSPDYLOAFSGFREQKKPOERNIYVSDZSUOVGXSRRIPWERDIPCFSDIQZIASEJVCGXAYBGYXFPSREKFMEXEBIYDGFKREOWGXEQSXSKXGYRRRVMEKFFIPIWJSKFDJMBGCC", 3, 7, firstWordLengthList)
     messageBreak("MTZHZEOQKASVBDOWMWMKMNYIIHVWPEXJA", 4, 10, firstWordLengthList)
